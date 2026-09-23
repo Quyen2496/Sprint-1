@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Frontend API Integration</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            margin-top: 5px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            opacity: 0.9;
+        }
+
+        .btn-login {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-api {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-refresh {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-logout {
+            background: #ef4444;
+            color: white;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .logged-out {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .logged-in {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .token-box {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            word-break: break-all;
+            font-size: 13px;
+            min-height: 50px;
+        }
+
+        .token-title {
+            font-weight: bold;
+            color: #444;
+            margin-bottom: 5px;
+        }
+
+        pre {
+            background: #111827;
+            color: #22c55e;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            min-height: 150px;
+            white-space: pre-wrap;
+        }
+
+        .log {
+            margin-top: 15px;
+            background: #f8fafc;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 14px;
+        }
+
+        .log-item {
+            margin-bottom: 8px;
+        }
+
+        .success {
+            color: #15803d;
+        }
+
+        .error {
+            color: #dc2626;
+        }
+
+        .warning {
+            color: #d97706;
+        }
+
+        .info {
+            color: #2563eb;
+        }
+
+        .flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .flow span {
+            background: #eef2ff;
+            color: #4338ca;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 800px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>Frontend API Integration</h1>
+        <p>Access Token & Refresh Token Authentication</p>
+    </div>
+
+    <div class="grid">
+
+        <div>
+
+            <div class="card">
+
+                <h2> Đăng nhập</h2>
+
+                <div id="status" class="status logged-out">
+                    Chưa đăng nhập
+                </div>
+
+                <form id="loginForm">
+
+                    <label>Email</label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        value="user@gmail.com"
+                        required
+                    >
+
+                    <label>Mật khẩu</label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        value="123456"
+                        required
+                    >
+
+                    <button
+                        type="submit"
+                        class="btn-login">
+                        Đăng nhập
+                    </button>
+
+                </form>
+
+                <button
+                    id="logoutBtn"
+                    class="btn-logout"
+                    style="display:none;">
+                    Đăng xuất
+                </button>
+
+            </div>
+
+            <div class="card">
+
+                <h2> Token</h2>
+
+                <div class="token-title">
+                    Access Token
+                </div>
+
+                <div
+                    id="accessToken"
+                    class="token-box">
+                    Chưa có Access Token
+                </div>
+
+
+                <div class="token-title">
+                    Refresh Token
+                </div>
+
+                <div
+                    id="refreshToken"
+                    class="token-box">
+                    Chưa có Refresh Token
+                </div>
+
+            </div>
+
+        </div>
+
+        <div>
+
+            <div class="card">
+
+                <h2> API Operations</h2>
+
+                <button
+                    id="callApiBtn"
+                    class="btn-api"
+                    disabled>
+                    Gọi API bảo vệ
+                </button>
+
+                <button
+                    id="refreshBtn"
+                    class="btn-refresh"
+                    disabled>
+                    Làm mới Access Token
+                </button>
+
+                <div class="flow">
+                    <span>Login</span>
+                    →
+                    <span>Access Token</span>
+                    →
+                    <span>Call API</span>
+                    →
+                    <span>401</span>
+                    →
+                    <span>Refresh Token</span>
+                    →
+                    <span>Retry API</span>
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                </h2> API Response</h2>
+
+                <pre id="apiResponse">
+Chưa có dữ liệu...
+                </pre>
+
+            </div>
+
+
+            <!-- LOG -->
+            <div class="card">
+
+                <h2> System Log</h2>
+
+                <div
+                    id="log"
+                    class="log">
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const API_BASE_URL = "https://example.com/api";
+
+const DEMO_MODE = true;
+
+let accessToken = null;
+let refreshToken = null;
+
+let accessTokenExpired = false;
+
+const loginForm = document.getElementById("loginForm");
+
+const logoutBtn = document.getElementById("logoutBtn");
+
+const callApiBtn = document.getElementById("callApiBtn");
+
+const refreshBtn = document.getElementById("refreshBtn");
+
+const statusElement = document.getElementById("status");
+
+const accessTokenElement =
+    document.getElementById("accessToken");
+
+const refreshTokenElement =
+    document.getElementById("refreshToken");
+
+const apiResponse =
+    document.getElementById("apiResponse");
+
+const logElement =
+    document.getElementById("log");
+
+function log(message, type = "info") {
+
+    const time = new Date().toLocaleTimeString();
+
+    const item = document.createElement("div");
+
+    item.className = `log-item ${type}`;
+
+    item.innerHTML =
+        `[${time}] ${message}`;
+
+    logElement.prepend(item);
+}
+
+
+
+function updateUI() {
+
+    if (accessToken) {
+
+        statusElement.textContent =
+            "Đã đăng nhập";
+
+        statusElement.className =
+            "status logged-in";
+
+        callApiBtn.disabled = false;
+
+        refreshBtn.disabled = false;
+
+        logoutBtn.style.display = "block";
+
+    } else {
+
+        statusElement.textContent =
+            "Chưa đăng nhập";
+
+        statusElement.className =
+            "status logged-out";
+
+        callApiBtn.disabled = true;
+
+        refreshBtn.disabled = true;
+
+        logoutBtn.style.display = "none";
+    }
+
+
+    accessTokenElement.textContent =
+        accessToken
+            ? accessToken
+            : "Chưa có Access Token";
+
+
+    refreshTokenElement.textContent =
+        refreshToken
+            ? refreshToken
+            : "Chưa có Refresh Token";
+}
+
+
+loginForm.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+        const email =
+            document.getElementById("email").value;
+
+        const password =
+            document.getElementById("password").value;
+
+
+        log(
+            "Đang gửi thông tin đăng nhập...",
+            "info"
+        );
+
+
+        try {
+
+            let data;
+
+
+            if (DEMO_MODE) {
+
+                await delay(800);
+
+                data = {
+
+                    accessToken:
+                        "ACCESS_TOKEN_" +
+                        generateRandomToken(),
+
+                    refreshToken:
+                        "REFRESH_TOKEN_" +
+                        generateRandomToken()
+
+                };
+
+            }
+
+
+            else {
+
+                const response =
+                    await fetch(
+                        `${API_BASE_URL}/login`,
+                        {
+
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+                                email,
+                                password
+                            })
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Đăng nhập thất bại"
+                    );
+
+                }
+
+                data =
+                    await response.json();
+            }
+
+
+            accessToken =
+                data.accessToken;
+
+            refreshToken =
+                data.refreshToken;
+
+            accessTokenExpired = false;
+
+
+            localStorage.setItem(
+                "accessToken",
+                accessToken
+            );
+
+            localStorage.setItem(
+                "refreshToken",
+                refreshToken
+            );
+
+
+            updateUI();
+
+
+            log(
+                "Đăng nhập thành công.",
+                "success"
+            );
+
+            log(
+                "Đã nhận Access Token.",
+                "success"
+            );
+
+            log(
+                "Đã nhận Refresh Token.",
+                "success"
+            );
+
+
+            apiResponse.textContent =
+                JSON.stringify(
+                    data,
+                    null,
+                    4
+                );
+
+        }
+
+        catch(error) {
+
+            log(
+                error.message,
+                "error"
+            );
+
+            apiResponse.textContent =
+                JSON.stringify(
+                    {
+                        error:
+                            error.message
+                    },
+                    null,
+                    4
+                );
+        }
+
+    }
+);
+
+
+callApiBtn.addEventListener(
+    "click",
+    async function() {
+
+        await callProtectedAPI();
+
+    }
+);
+
+
+async function callProtectedAPI() {
+
+    if (!accessToken) {
+
+        log(
+            "Bạn chưa đăng nhập.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    log(
+        "Đang gọi API với Access Token...",
+        "info"
+    );
+
+
+    try {
+
+        let response;
+
+
+        if (DEMO_MODE) {
+
+            await delay(700);
+
+
+            if (accessTokenExpired) {
+
+                response = {
+
+                    status: 401,
+
+                    ok: false,
+
+                    json: async () => ({
+                        message:
+                            "Access Token expired"
+                    })
+
+                };
+
+            } else {
+
+                response = {
+
+                    status: 200,
+
+                    ok: true,
+
+                    json: async () => ({
+
+                        message:
+                            "Gọi API thành công!",
+
+                        user:
+                            "user@example.com",
+
+                        data: [
+                            "Book 01",
+                            "Book 02",
+                            "Book 03"
+                        ]
+
+                    })
+
+                };
+
+            }
+
+        }
+
+
+        else {
+
+            response =
+                await fetch(
+                    `${API_BASE_URL}/protected`,
+                    {
+
+                        method: "GET",
+
+                        headers: {
+
+                            "Authorization":
+                                `Bearer ${accessToken}`,
+
+                            "Content-Type":
+                                "application/json"
+
+                        }
+
+                    }
+                );
+
+        }
+
+
+        if (response.status === 401) {
+
+            log(
+                "Access Token đã hết hạn.",
+                "warning"
+            );
+
+            log(
+                "Đang gọi Refresh Token...",
+                "info"
+            );
+
+
+            const refreshed =
+                await refreshAccessToken();
+
+
+            if (refreshed) {
+
+                log(
+                    "Refresh Token thành công.",
+                    "success"
+                );
+
+                log(
+                    "Đang gọi lại API...",
+                    "info"
+                );
+
+
+                return await callProtectedAPI();
+
+            }
+
+
+            return;
+
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "API trả về lỗi."
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        apiResponse.textContent =
+            JSON.stringify(
+                data,
+                null,
+                4
+            );
+
+
+        log(
+            "API trả về dữ liệu thành công.",
+            "success"
+        );
+
+    }
+
+    catch(error) {
+
+        log(
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+refreshBtn.addEventListener(
+    "click",
+    async function() {
+
+        await refreshAccessToken();
+
+    }
+);
+
+
+async function refreshAccessToken() {
+
+    if (!refreshToken) {
+
+        requireLogin();
+
+        return false;
+    }
+
+
+    try {
+
+        let data;
+
+
+        if (DEMO_MODE) {
+
+            await delay(800);
+
+
+            if (
+                refreshToken ===
+                "REFRESH_TOKEN_EXPIRED"
+            ) {
+
+                throw new Error(
+                    "REFRESH_TOKEN_EXPIRED"
+                );
+
+            }
+
+
+            data = {
+
+                accessToken:
+                    "NEW_ACCESS_TOKEN_" +
+                    generateRandomToken()
+
+            };
+
+        }
+
+
+        else {
+
+            const response =
+                await fetch(
+                    `${API_BASE_URL}/refresh`,
+                    {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+
+                            refreshToken:
+                                refreshToken
+
+                        })
+
+                    }
+                );
+
+
+            if (response.status === 401) {
+
+                throw new Error(
+                    "REFRESH_TOKEN_EXPIRED"
+                );
+
+            }
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Refresh Token thất bại"
+                );
+
+            }
+
+
+            data =
+                await response.json();
+
+        }
+
+
+        accessToken =
+            data.accessToken;
+
+        accessTokenExpired = false;
+
+
+        localStorage.setItem(
+            "accessToken",
+            accessToken
+        );
+
+
+        updateUI();
+
+
+        log(
+            "Access Token mới đã được cấp.",
+            "success"
+        );
+
+
+        return true;
+
+    }
+
+    catch(error) {
+
+        log(
+            "Refresh Token đã hết hạn.",
+            "error"
+        );
+
+
+        requireLogin();
+
+
+        return false;
+
+    }
+
+}
+
+
+function requireLogin() {
+
+    accessToken = null;
+
+    refreshToken = null;
+
+    accessTokenExpired = false;
+
+
+    localStorage.removeItem(
+        "accessToken"
+    );
+
+    localStorage.removeItem(
+        "refreshToken"
+    );
+
+
+    updateUI();
+
+
+    apiResponse.textContent =
+        "Phiên đăng nhập đã hết hạn.\n" +
+        "Vui lòng đăng nhập lại.";
+
+
+    log(
+        "Refresh Token hết hạn.",
+        "error"
+    );
+
+    log(
+        "Vui lòng đăng nhập lại.",
+        "warning"
+    );
+
+}
+
+
+logoutBtn.addEventListener(
+    "click",
+    function() {
+
+        accessToken = null;
+
+        refreshToken = null;
+
+
+        localStorage.removeItem(
+            "accessToken"
+        );
+
+        localStorage.removeItem(
+            "refreshToken"
+        );
+
+
+        updateUI();
+
+
+        apiResponse.textContent =
+            "Đã đăng xuất.";
+
+
+        log(
+            "Đã đăng xuất khỏi hệ thống.",
+            "info"
+        );
+
+    }
+);
+
+function simulateAccessTokenExpired() {
+
+    if (!accessToken) {
+
+        log(
+            "Bạn cần đăng nhập trước.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    accessTokenExpired = true;
+
+
+    log(
+        "Đã mô phỏng Access Token hết hạn.",
+        "warning"
+    );
+
+}
+
+
+function loadTokens() {
+
+    accessToken =
+        localStorage.getItem(
+            "accessToken"
+        );
+
+    refreshToken =
+        localStorage.getItem(
+            "refreshToken"
+        );
+
+
+    if (accessToken) {
+
+        log(
+            "Đã khôi phục Access Token.",
+            "success"
+        );
+
+    }
+
+
+    if (refreshToken) {
+
+        log(
+            "Đã khôi phục Refresh Token.",
+            "success"
+        );
+
+    }
+
+
+    updateUI();
+
+}
+
+function delay(ms) {
+
+    return new Promise(
+        resolve =>
+            setTimeout(resolve, ms)
+    );
+
+}
+
+
+function generateRandomToken() {
+
+    return Math.random()
+        .toString(36)
+        .substring(2, 15);
+
+}
+
+
+loadTokens();
+
+</script>
+
+</body>
+</html>
