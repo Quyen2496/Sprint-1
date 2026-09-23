@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Homestay — Đăng nhập & Xác thực</title>
+<style>
+:root{--bg:#f5f6fb;--card:#fff;--ink:#1b1f3a;--mut:#626888;--line:#e2e5f1;--pri:#4f46e5;--soft:#eceeff;--ok:#15803d;--bad:#b91c1c;--warn:#b45309;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1122;--card:#171b35;--ink:#e8eaf9;--mut:#99a0c4;--line:#292e50;--pri:#8b85ff;--soft:#21264a;--ok:#4ade80;--bad:#f87171;--warn:#fbbf24}}
+:root[data-theme="dark"]{--bg:#0e1122;--card:#171b35;--ink:#e8eaf9;--mut:#99a0c4;--line:#292e50;--pri:#8b85ff;--soft:#21264a;--ok:#4ade80;--bad:#f87171;--warn:#fbbf24}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.app{max-width:1180px;margin:auto;padding:20px 16px;display:grid;gap:16px;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:start}
+@media(max-width:860px){.app{grid-template-columns:1fr}}
+.c{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.c:last-child{margin-bottom:0}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:15px;margin:0 0 10px}
+.mut{color:var(--mut)}.sm{font-size:13px}
+label{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
+.in{display:flex;gap:6px}
+input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font-size:15px}
+input.bad{border-color:var(--bad)}
+.err{color:var(--bad);font-size:13px;min-height:18px;margin-top:3px}
+button{border:0;border-radius:9px;padding:9px 14px;font-weight:600;font-size:14px;cursor:pointer;background:var(--pri);color:#fff}
+button.s{background:var(--soft);color:var(--pri)}
+button.d{background:transparent;color:var(--bad);border:1px solid var(--line)}
+button:disabled{opacity:.5;cursor:default}
+.full{width:100%;margin-top:14px;padding:11px}
+.box{padding:10px 12px;border-radius:9px;font-size:14px;margin-top:12px}
+.box.e{background:color-mix(in srgb,var(--bad) 12%,transparent);color:var(--bad)}
+.box.i{background:var(--soft)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:4px 10px;font-size:14px}
+.kv b{color:var(--mut);font-weight:600}
+.mono{font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
+.sc{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:480px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--mut);font-weight:600}
+.log{max-height:260px;overflow:auto;font:12.5px/1.6 ui-monospace,Menlo,Consolas,monospace}
+.log div{padding:1px 0}.t{display:inline-block;min-width:34px;font-weight:700}
+.FE{color:var(--pri)}.BE{color:var(--warn)}.OK{color:var(--ok)}.ER{color:var(--bad)}
+.hint{cursor:pointer;text-decoration:underline dotted}
+.pill{display:inline-block;padding:1px 9px;border-radius:99px;background:var(--soft);font-weight:600;font-size:12.5px}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+<div>
+  <!-- Trang đăng nhập -->
+  <div class="c" id="vLogin">
+    <h1>Đăng nhập</h1>
+    <p class="mut sm" style="margin:0">Hệ thống quản lý Homestay</p>
+    <div class="box e hide" id="authMsg"></div>
+    <label for="em">Email</label>
+    <input id="em" type="text" autocomplete="off" placeholder="ten@homestay.vn">
+    <div class="err" id="emE"></div>
+    <label for="pw">Mật khẩu</label>
+    <div class="in"><input id="pw" type="password" placeholder="Nhập mật khẩu"><button class="s" id="eye" type="button">Hiện</button></div>
+    <div class="err" id="pwE"></div>
+    <div class="err" id="fE" style="font-size:14px"></div>
+    <button class="full" id="go">Đăng nhập</button>
+    <p class="sm mut" style="margin:12px 0 0">Quên mật khẩu? · Chưa có tài khoản? Đăng ký <i>(chỉ là liên kết giữ chỗ)</i></p>
+    <div class="box i sm">Tài khoản mẫu (bấm để điền):<br>
+      <span class="hint" data-e="admin@homestay.vn" data-p="Admin@123">admin@homestay.vn / Admin@123</span><br>
+      <span class="hint" data-e="letan@homestay.vn" data-p="LeTan@123">letan@homestay.vn / LeTan@123</span></div>
+  </div>
+
+  <!-- Trang chính -->
+  <div id="vMain" class="hide">
+    <div class="c">
+      <h1>Trang chính</h1>
+      <p class="mut sm" style="margin:0">Đăng nhập thành công. Xin chào, <b id="who"></b> <span class="pill" id="role"></span></p>
+      <div class="row">
+        <button id="bApi">Gọi API được bảo vệ</button>
+        <button class="s" id="bRf">Refresh thủ công</button>
+        <button class="s" id="bOld">Dùng lại Refresh Token cũ</button>
+        <button class="d" id="bOut">Đăng xuất</button>
+      </div>
+      <div class="box i sm" id="apiRes">Chưa gọi API.</div>
+    </div>
+    <div class="c">
+      <h2>Phiên đăng nhập (phía client)</h2>
+      <div class="kv">
+        <b>Access Token</b><span><span class="pill" id="atCd">—</span> <span class="mut sm">giữ trong bộ nhớ</span></span>
+        <b>Payload</b><span class="mono" id="atP">—</span>
+        <b>Refresh Token</b><span><span class="pill" id="rtCd">—</span> <span class="mut sm">cookie HttpOnly (mô phỏng)</span></span>
+      </div>
+      <p class="mut sm" style="margin:10px 0 0">Payload không chứa mật khẩu. Access Token hết hạn thì client tự gọi refresh rồi gửi lại request.</p>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="c">
+    <h2>Bảng điều khiển kiểm thử</h2>
+    <div class="kv" style="grid-template-columns:120px 1fr"><b>Giờ mô phỏng</b><span id="clk"></span></div>
+    <div class="row"><button class="s" data-m="5">+5 phút</button><button class="s" data-m="16">+16 phút</button><button class="s" data-m="31">+31 phút</button><button class="s" data-m="10080">+7 ngày</button><button class="d" id="rst">Đặt lại tất cả</button></div>
+    <p class="mut sm" style="margin:10px 0 0">Tua thời gian để thử: hết cửa sổ 15 phút, hết khóa 30 phút, Access Token hết hạn (30 phút), Refresh Token hết hạn (7 ngày).</p>
+  </div>
+  <div class="c"><h2>Bảng Account</h2><div class="sc"><table><thead><tr><th>id</th><th>email</th><th>passwordHash</th><th>failed</th><th>lastFailedAt</th><th>lockedAt</th></tr></thead><tbody id="tU"></tbody></table></div></div>
+  <div class="c"><h2>Bảng RefreshToken</h2><div class="sc"><table><thead><tr><th>id</th><th>userId</th><th>tokenHash</th><th>hết hạn</th><th>revoked</th></tr></thead><tbody id="tT"></tbody></table></div></div>
+  <div class="c"><h2>Nhật ký luồng xử lý</h2><div class="log" id="log"></div></div>
+</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id),enc=new TextEncoder(),M=6e4;
+const LOCK=30*M,WIN=15*M,ATL=30*M,RTL=7*24*60*M,MAXF=5,SECRET='homestay_demo_secret';
+const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+const b64u=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const j64=o=>b64u(enc.encode(JSON.stringify(o)));
+const sha=async s=>hex(await crypto.subtle.digest('SHA-256',enc.encode(s)));
+let off=0;const now=()=>Date.now()+off;
+const tm=t=>t?new Date(t).toLocaleTimeString('vi-VN'):'—';
+const mins=ms=>Math.max(0,Math.ceil(ms/M));
+
+async function hmac(d){const k=await crypto.subtle.importKey('raw',enc.encode(SECRET),{name:'HMAC',hash:'SHA-256'},false,['sign']);return b64u(await crypto.subtle.sign('HMAC',k,enc.encode(d)))}
+async function sign(p){const h=j64({alg:'HS256',typ:'JWT'}),b=j64(p);return h+'.'+b+'.'+await hmac(h+'.'+b)}
+async function verify(t){const [h,b,s]=t.split('.');if(!s||await hmac(h+'.'+b)!==s)return{ok:0,r:'INVALID'};const p=JSON.parse(atob(b.replace(/-/g,'+').replace(/_/g,'/')));return p.exp*1000<=now()?{ok:0,r:'EXPIRED'}:{ok:1,p}}
+
+/* ===== Nhật ký ===== */
+const LG=[];
+function L(t,m){LG.unshift([t,`[${tm(now())}] ${m}`]);if(LG.length>80)LG.pop();$('log').innerHTML=LG.map(([a,b])=>`<div><span class="t ${a}">${a}</span>${b}</div>`).join('')}
+
+/* ===== "Database" & Backend mô phỏng ===== */
+let DB,tid;
+async function mkUser(id,email,role,pw){const salt=hex(crypto.getRandomValues(new Uint8Array(6)));return{id,email,role,hash:'$sim$'+salt+'$'+await sha(salt+pw),failed:0,lastFailed:null,lockedAt:null}}
+const chk=async(u,pw)=>{const [,,salt,h]=u.hash.split('$');return await sha(salt+pw)===h};
+async function initDB(){tid=1;DB={users:[await mkUser(1,'admin@homestay.vn','ADMIN','Admin@123'),await mkUser(2,'letan@homestay.vn','RECEPTIONIST','LeTan@123')],tokens:[]}}
+const ERR={MISSING_TOKEN:[401,'Không tìm thấy refresh token'],TOKEN_NOT_FOUND:[403,'Phiên đăng nhập không hợp lệ.'],TOKEN_REVOKED:[403,'Phiên đăng nhập đã bị thu hồi, vui lòng đăng nhập lại.'],TOKEN_EXPIRED:[403,'Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.'],USER_NOT_FOUND:[403,'Tài khoản không tồn tại.'],USER_LOCKED:[403,'Tài khoản đã bị khóa.']};
+const E=c=>({status:ERR[c][0],code:c,message:ERR[c][1]});
+async function issue(u){
+  const t=Math.floor(now()/1000);
+  const access=await sign({userId:u.id,email:u.email,role:u.role,iat:t,exp:t+ATL/1000});
+  const raw=hex(crypto.getRandomValues(new Uint8Array(64)));
+  DB.tokens.push({id:tid++,userId:u.id,hash:await sha(raw),exp:now()+RTL,revoked:false});
+  return{status:200,access,refresh:raw,user:{email:u.email,role:u.role}};
+}
+async function beLogin(email,pw){
+  L('BE','POST /api/login');
+  const u=DB.users.find(x=>x.email===email.toLowerCase()),bad={status:400,message:'Email hoặc mật khẩu không chính xác.'};
+  if(!u){L('BE','Không tìm thấy tài khoản → trả thông báo chung');return bad}
+  if(u.lockedAt){
+    if(now()>=u.lockedAt+LOCK){u.lockedAt=null;u.failed=0;u.lastFailed=null;L('OK','Đã qua 30 phút → tự mở khóa')}
+    else{L('ER','Tài khoản đang khóa → từ chối, không kiểm tra mật khẩu');return{status:403,message:`Tài khoản đang bị khóa do nhập sai ${MAXF} lần. Thử lại sau ${mins(u.lockedAt+LOCK-now())} phút.`}}
+  }
+  if(!await chk(u,pw)){
+    if(u.lastFailed&&now()>u.lastFailed+WIN){u.failed=1;L('BE','Lần sai trước quá 15 phút → đếm lại từ 1')}else u.failed++;
+    u.lastFailed=now();
+    if(u.failed>=MAXF){u.lockedAt=now();L('ER',`Sai lần ${u.failed} → ghi lockedAt, khóa 30 phút`);return{status:403,message:`Bạn đã nhập sai ${MAXF} lần. Tài khoản bị khóa 30 phút.`}}
+    L('ER',`So khớp BCrypt thất bại (${u.failed}/${MAXF})`);return bad;
+  }
+  u.failed=0;u.lastFailed=null;u.lockedAt=null;
+  L('OK','So khớp BCrypt thành công → reset bộ đếm, sinh Access + Refresh Token');
+  return issue(u);
+}
+async function beRefresh(raw){
+  L('BE','POST /api/auth/refresh');
+  if(!raw)return E('MISSING_TOKEN');
+  const h=await sha(raw),d=DB.tokens.find(x=>x.hash===h);
+  if(!d)return E('TOKEN_NOT_FOUND');
+  if(d.revoked){DB.tokens.forEach(x=>{if(x.userId===d.userId)x.revoked=true});L('ER','🚨 Token đã thu hồi bị dùng lại → thu hồi TOÀN BỘ token của tài khoản');return E('TOKEN_REVOKED')}
+  if(d.exp<=now()){DB.tokens=DB.tokens.filter(x=>x!==d);return E('TOKEN_EXPIRED')}
+  const u=DB.users.find(x=>x.id===d.userId);
+  if(!u)return E('USER_NOT_FOUND');
+  if(u.lockedAt&&now()<u.lockedAt+LOCK)return E('USER_LOCKED');
+  d.revoked=true;L('OK','Refresh Token hợp lệ → thu hồi token cũ, cấp cặp token mới (rotation)');
+  return issue(u);
+}
+async function beApi(tok){
+  L('BE','GET /api/profile');
+  if(!tok)return{status:401,code:'NO_TOKEN'};
+  const v=await verify(tok);
+  return v.ok?{status:200,data:v.p}:{status:401,code:v.r};
+}
+
+/* ===== Frontend ===== */
+let S={access:null,cookie:null,old:null,user:null};
+function show(v){$('vLogin').classList.toggle('hide',v!=='login');$('vMain').classList.toggle('hide',v!=='main')}
+function apply(r){S.old=S.cookie;S.access=r.access;S.cookie=r.refresh;S.user=r.user;$('who').textContent=r.user.email;$('role').textContent=r.user.role}
+function logout(msg){S={access:null,cookie:null,old:null,user:null};show('login');$('pw').value='';const m=$('authMsg');m.textContent=msg||'';m.classList.toggle('hide',!msg);ui()}
+
+const isMail=s=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+async function doLogin(){
+  const e=$('em').value.trim(),p=$('pw').value;let ok=1;
+  $('emE').textContent=$('pwE').textContent=$('fE').textContent='';$('em').classList.remove('bad');$('pw').classList.remove('bad');$('authMsg').classList.add('hide');
+  if(!e){$('emE').textContent='Vui lòng nhập email.';$('em').classList.add('bad');ok=0}else if(!isMail(e)){$('emE').textContent='Email không hợp lệ.';$('em').classList.add('bad');ok=0}
+  if(!p){$('pwE').textContent='Vui lòng nhập mật khẩu.';$('pw').classList.add('bad');ok=0}
+  if(!ok){L('FE','Validate thất bại, chưa gọi API');return}
+  L('FE','Validate hợp lệ → gửi email + mật khẩu tới API');
+  const r=await beLogin(e,p);
+  if(r.status!==200){$('fE').textContent=r.message;ui();return}
+  apply(r);L('FE','Nhận Access Token (giữ trong bộ nhớ) + Refresh Token (cookie) → chuyển sang trang chính');
+  $('apiRes').textContent='Chưa gọi API.';show('main');ui();
+}
+async function callApi(){
+  L('FE','Gọi /api/profile kèm Authorization: Bearer …');
+  let r=await beApi(S.access);
+  if(r.status===401){
+    L('FE',`Nhận 401 (${r.code}) → gọi /auth/refresh bằng Refresh Token`);
+    const f=await beRefresh(S.cookie);
+    if(f.status!==200){L('ER',`Refresh thất bại (${f.code}) → yêu cầu đăng nhập lại`);return logout(f.message)}
+    apply(f);L('FE','Refresh thành công → gửi lại request ban đầu');r=await beApi(S.access);
+  }
+  $('apiRes').textContent=r.status===200?`200 OK — xin chào ${r.data.email} (quyền ${r.data.role}).`:`Lỗi ${r.status}`;
+  ui();
+}
+async function manualRefresh(){
+  const f=await beRefresh(S.cookie);
+  if(f.status!==200){L('ER',`Refresh thất bại (${f.code})`);return logout(f.message)}
+  apply(f);$('apiRes').textContent='Đã cấp Access Token mới (30 phút).';ui();
+}
+async function reuseOld(){
+  if(!S.old){$('apiRes').textContent='Chưa có Refresh Token cũ. Hãy bấm "Refresh thủ công" trước để token bị xoay vòng.';return}
+  L('FE','Giả lập kẻ trộm gửi Refresh Token cũ (đã bị thu hồi)');
+  const f=await beRefresh(S.old);
+  $('apiRes').textContent=`Server trả ${f.status} — ${f.message} Mọi phiên của tài khoản đã bị thu hồi.`;ui();
+}
+function out(){const h=S.cookie&&sha(S.cookie);
+  Promise.resolve(h).then(x=>{const d=DB.tokens.find(t=>t.hash===x);if(d)d.revoked=true;L('FE','Đăng xuất → thu hồi Refresh Token, xóa Access Token');logout('')})}
+
+/* ===== Giao diện ===== */
+function ui(){
+  $('clk').innerHTML=tm(now())+(off?` <span class="mut">(đã tua +${Math.round(off/M)} phút)</span>`:'');
+  const dec=S.access?JSON.parse(atob(S.access.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))):null;
+  $('atCd').textContent=dec?(dec.exp*1000>now()?`còn ${mins(dec.exp*1000-now())} phút`:'đã hết hạn'):'—';
+  $('atP').textContent=dec?JSON.stringify({userId:dec.userId,email:dec.email,role:dec.role,exp:dec.exp}):'—';
+  $('rtCd').textContent=S.cookie?'đã lưu (7 ngày)':'—';
+  $('tU').innerHTML=DB.users.map(u=>`<tr><td>${u.id}</td><td>${u.email}</td><td class="mono">${u.hash.slice(0,18)}…</td><td>${u.failed}</td><td>${tm(u.lastFailed)}</td><td>${u.lockedAt?tm(u.lockedAt)+(now()<u.lockedAt+LOCK?' (khóa)':' (đã hết)'):'—'}</td></tr>`).join('');
+  $('tT').innerHTML=DB.tokens.length?DB.tokens.map(t=>`<tr><td>${t.id}</td><td>${t.userId}</td><td class="mono">${t.hash.slice(0,14)}…</td><td>${t.exp<=now()?'đã hết hạn':'còn '+Math.ceil((t.exp-now())/864e5)+' ngày'}</td><td>${t.revoked?'true':'false'}</td></tr>`).join(''):'<tr><td colspan="5" class="mut">Chưa có token.</td></tr>';
+}
+$('go').onclick=doLogin;
+['em','pw'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()}));
+$('eye').onclick=()=>{const p=$('pw').type==='password';$('pw').type=p?'text':'password';$('eye').textContent=p?'Ẩn':'Hiện'};
+document.querySelectorAll('.hint').forEach(h=>h.onclick=()=>{$('em').value=h.dataset.e;$('pw').value=h.dataset.p});
+$('bApi').onclick=callApi;$('bRf').onclick=manualRefresh;$('bOld').onclick=reuseOld;$('bOut').onclick=out;
+document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{off+=b.dataset.m*M;L('FE',`Tua thời gian +${b.dataset.m} phút`);ui()});
+$('rst').onclick=async()=>{off=0;LG.length=0;await initDB();logout('');L('FE','Đã đặt lại dữ liệu mẫu.')};
+initDB().then(()=>{show('login');ui();L('FE','Sẵn sàng. Hãy thử đăng nhập.');setInterval(ui,1000)});
+</script>
+</body>
+</html>
