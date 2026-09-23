@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Đăng Nhập - Logic & Functionality Simulator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Font Inter & Fira Code -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        pre, code, .font-mono { font-family: 'Fira Code', monospace; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/90 sticky top-0 z-50 backdrop-blur">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-indigo-600 rounded-lg text-white">
+                    <i data-lucide="code-2" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-white">Login API Logic & Functionality Tester</h1>
+                    <p class="text-xs text-slate-400">Chương trình mô phỏng logic xử lý backend API Đăng nhập & Hash SHA-256</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs text-slate-400 hidden sm:inline">SHA-256 Protected</span>
+                <span class="px-2.5 py-1 rounded-md text-xs font-mono bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">POST /api/v1/auth/login</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+
+        <!-- Flowchart / Sequence Diagram -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-bold text-slate-200 flex items-center gap-2">
+                    <i data-lucide="git-commit" class="w-5 h-5 text-indigo-400"></i>
+                    Sơ Đồ Xử Lý Luồng API (Backend Logic Flow)
+                </h2>
+                <span class="text-xs text-slate-400">Chuẩn bảo mật OWASP</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
+                <!-- Step 1 -->
+                <div id="flow-step-1" class="flow-step p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl transition-all duration-300">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-bold text-indigo-400">01. Request</span>
+                        <i data-lucide="arrow-right-circle" class="w-4 h-4 text-slate-500"></i>
+                    </div>
+                    <p class="font-semibold text-slate-200 mb-1">Nhận Payload</p>
+                    <p class="text-[11px] text-slate-400">Trích xuất <code class="text-indigo-300">email</code> và <code class="text-indigo-300">password</code> từ body request.</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div id="flow-step-2" class="flow-step p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl transition-all duration-300">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-bold text-indigo-400">02. DB Query</span>
+                        <i data-lucide="database" class="w-4 h-4 text-slate-500"></i>
+                    </div>
+                    <p class="font-semibold text-slate-200 mb-1">Tìm Tài Khoản</p>
+                    <p class="text-[11px] text-slate-400">Tìm kiếm record trong Database bằng Email.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div id="flow-step-3" class="flow-step p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl transition-all duration-300">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-bold text-indigo-400">03. SHA-256 Hash</span>
+                        <i data-lucide="key-round" class="w-4 h-4 text-slate-500"></i>
+                    </div>
+                    <p class="font-semibold text-slate-200 mb-1">Mã Hóa & So Sánh</p>
+                    <p class="text-[11px] text-slate-400">Hash password input và so sánh với hash lưu trong DB.</p>
+                </div>
+
+                <!-- Step 4 -->
+                <div id="flow-step-4" class="flow-step p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl transition-all duration-300">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-bold text-indigo-400">04. Validate</span>
+                        <i data-lucide="shield-alert" class="w-4 h-4 text-slate-500"></i>
+                    </div>
+                    <p class="font-semibold text-slate-200 mb-1">Xác Thực Lỗi</p>
+                    <p class="text-[11px] text-slate-400">Nếu sai Email HOẶC Password $\rightarrow$ Trả lỗi CHUNG (Bảo mật).</p>
+                </div>
+
+                <!-- Step 5 -->
+                <div id="flow-step-5" class="flow-step p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl transition-all duration-300">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-bold text-indigo-400">05. Response</span>
+                        <i data-lucide="send" class="w-4 h-4 text-slate-500"></i>
+                    </div>
+                    <p class="font-semibold text-slate-200 mb-1">Trả JSON</p>
+                    <p class="text-[11px] text-slate-400">HTTP 200 + Token (Thành công) hoặc HTTP 401 (Thất bại).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Tester & Live Log Console -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <!-- Left: API Tester Panel -->
+            <section class="lg:col-span-5 space-y-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+                        <h2 class="text-base font-bold text-white flex items-center gap-2">
+                            <i data-lucide="terminal" class="w-5 h-5 text-indigo-400"></i>
+                            API Tester (Gửi Request)
+                        </h2>
+                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">POST</span>
+                    </div>
+
+                    <!-- Test Cases Quick Buttons -->
+                    <div class="mb-5 space-y-2">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Kịch bản kiểm thử sẵn có:</p>
+                        <div class="grid grid-cols-1 gap-2">
+                            <button onclick="loadTestCase('valid')" class="px-3 py-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg text-xs text-left flex items-center justify-between transition group">
+                                <span class="text-emerald-400 font-medium">1. Đúng Email & Đúng Password</span>
+                                <i data-lucide="play" class="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400"></i>
+                            </button>
+                            <button onclick="loadTestCase('wrong_email')" class="px-3 py-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg text-xs text-left flex items-center justify-between transition group">
+                                <span class="text-amber-400 font-medium">2. Sai Email (Không có trong DB)</span>
+                                <i data-lucide="play" class="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400"></i>
+                            </button>
+                            <button onclick="loadTestCase('wrong_pass')" class="px-3 py-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg text-xs text-left flex items-center justify-between transition group">
+                                <span class="text-rose-400 font-medium">3. Đúng Email nhưng Sai Password</span>
+                                <i data-lucide="play" class="w-3.5 h-3.5 text-slate-500 group-hover:text-rose-400"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Form Inputs -->
+                    <form onsubmit="executeApiTest(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Payload Email</label>
+                            <input type="email" id="inputEmail" required placeholder="user@example.com"
+                                class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono outline-none" />
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Payload Password</label>
+                            <input type="text" id="inputPassword" required placeholder="password123"
+                                class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg px-3 py-2 text-sm text-slate-200 font-mono outline-none" />
+                        </div>
+
+                        <button type="submit" id="btnExecute"
+                            class="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-sm cursor-pointer">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                            <span>Gửi Request Tới API</span>
+                        </button>
+                    </form>
+
+                    <!-- Mock DB Viewer -->
+                    <div class="mt-6 pt-5 border-t border-slate-800">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-semibold text-slate-400 uppercase">Mock Database Context</span>
+                            <span class="text-[10px] text-slate-500 font-mono">users_table</span>
+                        </div>
+                        <div class="bg-slate-950 rounded-lg p-3 border border-slate-800/80 text-[11px] font-mono text-slate-400 space-y-1 overflow-x-auto">
+                            <div><span class="text-indigo-400">User 1:</span> dev@system.io / pass123</div>
+                            <div class="text-[10px] text-slate-600">SHA-256: 9b71d224bd62f3785d96d46ad3ea3d73319bfbc2890caadae2dff72519673ca72</div>
+                            <div class="pt-1"><span class="text-indigo-400">User 2:</span> admin@system.io / admin888</div>
+                            <div class="text-[10px] text-slate-600">SHA-256: 0ba9108b3c9902641775efc0f4f469ca483103fe0b24016b343cb6e81a941270</div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Right: Backend Execution Logs & JSON Response -->
+            <section class="lg:col-span-7 space-y-6 flex flex-col">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex-1 flex flex-col">
+                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+                        <h2 class="text-base font-bold text-white flex items-center gap-2">
+                            <i data-lucide="list-tree" class="w-5 h-5 text-indigo-400"></i>
+                            Nhật Ký Thực Thi Backend (Execution Logs)
+                        </h2>
+                        <button onclick="clearConsoleLog()" class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 transition">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Clear
+                        </button>
+                    </div>
+
+                    <!-- Logs Console Area -->
+                    <div id="executionLogs" class="bg-slate-950 border border-slate-800/80 rounded-xl p-4 font-mono text-xs flex-1 min-h-[360px] overflow-y-auto custom-scrollbar space-y-3">
+                        <div class="text-slate-600">// Nhấn "Gửi Request Tới API" hoặc chọn kịch bản để xem luồng xử lý chi tiết...</div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Clean Code Source Section -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-800">
+                <div>
+                    <h2 class="text-base font-bold text-white flex items-center gap-2">
+                        <i data-lucide="file-code" class="w-5 h-5 text-indigo-400"></i>
+                        Mã Nguồn Hàm API Backend Độc Lập (JavaScript / Node.js)
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Code xử lý hoàn chỉnh 5 tiêu chí: Nhận payload, Query DB, SHA-256 Hash, So sánh & Response bảo mật.</p>
+                </div>
+                <button onclick="copyCodeSnippet()" id="btnCopyCode" class="self-start sm:self-auto px-3 py-1.5 bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-200 border border-slate-700 rounded-lg text-xs font-mono flex items-center gap-2 transition cursor-pointer">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                    <span>Copy JS Code</span>
+                </button>
+            </div>
+
+            <div class="relative rounded-xl overflow-hidden bg-slate-950 border border-slate-800">
+                <pre class="p-4 text-xs font-mono text-slate-300 overflow-x-auto leading-relaxed custom-scrollbar"><code id="codeBlock">/**
+ * Hàm mô phỏng API Đăng nhập Backend
+ * @param {Object} req - HTTP Request object ({ body: { email, password } })
+ * @returns {Promise&lt;Object&gt;} - HTTP Response JSON & Status Code
+ */
+async function loginApi(req) {
+    const { email, password } = req.body || {};
+
+    // 1. Kiểm tra đầu vào tối thiểu
+    if (!email || !password) {
+        return {
+            status: 400,
+            json: { success: false, message: "Email và mật khẩu không được để trống." }
+        };
+    }
+
+    // 2. Tìm kiếm tài khoản trong Database theo Email
+    const user = await mockDb.findOne({ email: email.toLowerCase() });
+
+    // 3. Hàm tạo SHA-256 Hash cho password input
+    const hashPassword = async (plainText) => {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(plainText);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(hashBuffer))
+            .map(b => b.toString(16).padStart(2, '0')).join('');
+    };
+
+    const inputPasswordHash = await hashPassword(password);
+
+    // 4. MẬT KHẨU / EMAIL SAI -> Trả thông báo lỗi CHUNG để bảo mật
+    // Tránh tiết lộ tài khoản có tồn tại trong hệ thống hay không
+    if (!user || user.passwordHash !== inputPasswordHash) {
+        return {
+            status: 401,
+            json: {
+                success: false,
+                code: "AUTH_FAILED",
+                message: "Email hoặc mật khẩu không chính xác."
+            }
+        };
+    }
+
+    // 5. Đăng nhập THÀNH CÔNG -> Trả về dữ liệu người dùng & Access Token
+    return {
+        status: 200,
+        json: {
+            success: true,
+            message: "Đăng nhập thành công.",
+            data: {
+                token: `mock_jwt_token_${Date.now()}`,
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    fullName: user.fullName
+                }
+            }
+        }
+    };
+}</code></pre>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Mock Database với Mật khẩu đã được Mã Hóa SHA-256
+        // User 1: dev@system.io / pass123 -> SHA-256: 9b71d224bd62f3785d96d46ad3ea3d73319bfbc2890caadae2dff72519673ca72
+        // User 2: admin@system.io / admin888 -> SHA-256: 0ba9108b3c9902641775efc0f4f469ca483103fe0b24016b343cb6e81a941270
+        const MOCK_DATABASE = [
+            {
+                id: "usr_1001",
+                email: "dev@system.io",
+                passwordHash: "9b71d224bd62f3785d96d46ad3ea3d73319bfbc2890caadae2dff72519673ca72",
+                fullName: "Nguyễn Văn Dev"
+            },
+            {
+                id: "usr_1002",
+                email: "admin@system.io",
+                passwordHash: "0ba9108b3c9902641775efc0f4f469ca483103fe0b24016b343cb6e81a941270",
+                fullName: "Quản Trị Hệ Thống"
+            }
+        ];
+
+        // Init Lucide
+        document.addEventListener("DOMContentLoaded", () => {
+            lucide.createIcons();
+            loadTestCase('valid');
+        });
+
+        // Load test case presets
+        function loadTestCase(type) {
+            const emailInput = document.getElementById('inputEmail');
+            const passInput = document.getElementById('inputPassword');
+
+            if (type === 'valid') {
+                emailInput.value = 'dev@system.io';
+                passInput.value = 'pass123';
+            } else if (type === 'wrong_email') {
+                emailInput.value = 'notfound@system.io';
+                passInput.value = 'pass123';
+            } else if (type === 'wrong_pass') {
+                emailInput.value = 'dev@system.io';
+                passInput.value = 'wrongpassword';
+            }
+        }
+
+        // SHA-256 Hasher
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Delay helper for animation
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        // Highlight flowchart step
+        function highlightStep(stepNum, status = 'active') {
+            const stepEl = document.getElementById(`flow-step-${stepNum}`);
+            if (!stepEl) return;
+
+            if (status === 'active') {
+                stepEl.className = 'flow-step p-3.5 bg-indigo-950/60 border border-indigo-500 rounded-xl shadow-lg shadow-indigo-500/10 text-indigo-200 transition-all duration-300';
+            } else if (status === 'success') {
+                stepEl.className = 'flow-step p-3.5 bg-emerald-950/60 border border-emerald-500/80 rounded-xl text-emerald-200 transition-all duration-300';
+            } else if (status === 'error') {
+                stepEl.className = 'flow-step p-3.5 bg-rose-950/60 border border-rose-500/80 rounded-xl text-rose-200 transition-all duration-300';
+            } else {
+                stepEl.className = 'flow-step p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl text-slate-400 transition-all duration-300';
+            }
+        }
+
+        function resetAllSteps() {
+            for (let i = 1; i <= 5; i++) {
+                highlightStep(i, 'reset');
+            }
+        }
+
+        // Log entry helper
+        function appendLog(stage, message, details = null, type = 'info') {
+            const consoleBox = document.getElementById('executionLogs');
+            const logItem = document.createElement('div');
+            logItem.className = "border-l-2 pl-3 py-1 text-slate-300 font-mono text-xs animate-fadeIn";
+
+            let borderColor = "border-slate-700";
+            let stageColor = "text-slate-400";
+
+            if (type === 'req') { borderColor = "border-indigo-500"; stageColor = "text-indigo-400 font-bold"; }
+            else if (type === 'success') { borderColor = "border-emerald-500"; stageColor = "text-emerald-400 font-bold"; }
+            else if (type === 'error') { borderColor = "border-rose-500"; stageColor = "text-rose-400 font-bold"; }
+            else if (type === 'process') { borderColor = "border-sky-500"; stageColor = "text-sky-400 font-bold"; }
+
+            logItem.classList.add(borderColor);
+
+            let detailsHtml = '';
+            if (details) {
+                const formatted = typeof details === 'object' ? JSON.stringify(details, null, 2) : details;
+                detailsHtml = `<pre class="mt-1 bg-slate-900 p-2 rounded border border-slate-800/80 text-[11px] text-slate-300 overflow-x-auto">${escapeHtml(formatted)}</pre>`;
+            }
+
+            logItem.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-slate-500">[${new Date().toLocaleTimeString()}]</span>
+                    <span class="${stageColor}">${stage}</span>
+                    <span class="text-slate-300">${escapeHtml(message)}</span>
+                </div>
+                ${detailsHtml}
+            `;
+
+            consoleBox.appendChild(logItem);
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        function clearConsoleLog() {
+            document.getElementById('executionLogs').innerHTML = '<div class="text-slate-600">// Đã làm sạch log thực thi...</div>';
+            resetAllSteps();
+        }
+
+        // Main Execution Simulation
+        async function executeApiTest(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('inputEmail').value.trim();
+            const password = document.getElementById('inputPassword').value;
+            const btn = document.getElementById('btnExecute');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-75');
+
+            resetAllSteps();
+
+            // STEP 1: Payload Input
+            highlightStep(1, 'active');
+            appendLog('STEP 1: RECEIVE REQUEST', 'Nhận HTTP Body từ client', {
+                method: "POST",
+                path: "/api/v1/auth/login",
+                body: { email: email, password: password }
+            }, 'req');
+            await sleep(400);
+            highlightStep(1, 'success');
+
+            // STEP 2: Database Query
+            highlightStep(2, 'active');
+            appendLog('STEP 2: DB QUERY', `Tìm người dùng theo email = "${email}"`, null, 'process');
+            await sleep(400);
+
+            const userFound = MOCK_DATABASE.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+            if (userFound) {
+                appendLog('DB RESULT', `Tìm thấy record id="${userFound.id}"`, {
+                    id: userFound.id,
+                    email: userFound.email,
+                    storedHash: userFound.passwordHash
+                }, 'process');
+            } else {
+                appendLog('DB RESULT', `Không tìm thấy email "${email}" trong bảng users`, null, 'process');
+            }
+            highlightStep(2, 'success');
+
+            // STEP 3: Hash Password Input & Compare
+            highlightStep(3, 'active');
+            appendLog('STEP 3: SHA-256 HASH', `Thực hiện mã hóa SHA-256 cho password input...`, null, 'process');
+            await sleep(400);
+
+            const computedHash = await sha256(password);
+            appendLog('HASH COMPUTED', `Password Input Hash: ${computedHash}`, null, 'process');
+
+            const isPasswordMatched = userFound && (userFound.passwordHash === computedHash);
+            highlightStep(3, isPasswordMatched ? 'success' : 'error');
+
+            // STEP 4: Security Check (Lỗi chung nếu email sai HOẶC pass sai)
+            highlightStep(4, 'active');
+            await sleep(300);
+
+            if (!userFound || !isPasswordMatched) {
+                highlightStep(4, 'error');
+                appendLog('STEP 4: AUTH VERIFICATION', 'Xác thực THẤT BẠI. Lý do internal: ' + (!userFound ? 'Email không tồn tại' : 'Mật khẩu sai'), null, 'error');
+                
+                // STEP 5: Response 401
+                highlightStep(5, 'error');
+                const errorResponse = {
+                    status: 401,
+                    json: {
+                        success: false,
+                        code: "AUTH_FAILED",
+                        message: "Email hoặc mật khẩu không chính xác." // THÔNG BÁO BẢO MẬT CHUNG
+                    }
+                };
+
+                appendLog('STEP 5: HTTP RESPONSE 401', 'Trả về response lỗi bảo mật chung cho Client', errorResponse, 'error');
+            } else {
+                highlightStep(4, 'success');
+                appendLog('STEP 4: AUTH VERIFICATION', 'Xác thực THÀNH CÔNG. Khớp email & password hash.', null, 'success');
+
+                // STEP 5: Response 200
+                highlightStep(5, 'success');
+                const successResponse = {
+                    status: 200,
+                    json: {
+                        success: true,
+                        message: "Đăng nhập thành công.",
+                        data: {
+                            token: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.user_${userFound.id}_${Date.now()}`,
+                            user: {
+                                id: userFound.id,
+                                email: userFound.email,
+                                fullName: userFound.fullName
+                            }
+                        }
+                    }
+                };
+
+                appendLog('STEP 5: HTTP RESPONSE 200', 'Trả về Token và thông tin User cho Client', successResponse, 'success');
+            }
+
+            btn.disabled = false;
+            btn.classList.remove('opacity-75');
+        }
+
+        // Copy Code Functionality
+        function copyCodeSnippet() {
+            const codeText = document.getElementById('codeBlock').innerText;
+            navigator.clipboard.writeText(codeText).then(() => {
+                const btn = document.getElementById('btnCopyCode');
+                btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i><span class="text-emerald-400">Đã Copy!</span>`;
+                lucide.createIcons();
+                setTimeout(() => {
+                    btn.innerHTML = `<i data-lucide="copy" class="w-3.5 h-3.5"></i><span>Copy JS Code</span>`;
+                    lucide.createIcons();
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
