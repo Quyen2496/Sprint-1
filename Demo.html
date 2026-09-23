@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Demo</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 950px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #4f46e5;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .login-box {
+            max-width: 450px;
+            margin: auto;
+        }
+
+        .dashboard {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+
+        button {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 18px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.85;
+            transform: translateY(-1px);
+        }
+
+        .btn-login {
+            width: 100%;
+            background: #4f46e5;
+            color: white;
+        }
+
+        .btn-api {
+            background: #16a34a;
+            color: white;
+        }
+
+        .btn-refresh {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-logout {
+            background: #dc2626;
+            color: white;
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            color: #334155;
+        }
+
+        .token {
+            word-break: break-all;
+            background: #111827;
+            color: #22c55e;
+            padding: 12px;
+            border-radius: 7px;
+            font-size: 12px;
+            min-height: 60px;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #eff6ff;
+            border-left: 5px solid #3b82f6;
+        }
+
+        .status.success {
+            background: #f0fdf4;
+            border-color: #22c55e;
+        }
+
+        .status.error {
+            background: #fef2f2;
+            border-color: #ef4444;
+        }
+
+        .status.warning {
+            background: #fffbeb;
+            border-color: #f59e0b;
+        }
+
+        .api-result {
+            margin-top: 20px;
+            background: #111827;
+            color: #e5e7eb;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 100px;
+            white-space: pre-wrap;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .note {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 700px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1> Demo</h1>
+        <p>Access Token & Refresh Token</p>
+    </div>
+
+    <div class="content">
+
+
+        <div id="loginSection" class="login-box">
+
+            <h2 style="margin-bottom: 20px;">
+                Đăng nhập hệ thống
+            </h2>
+
+            <div class="form-group">
+                <label>Tài khoản</label>
+                <input
+                    type="text"
+                    id="username"
+                    placeholder="Nhập tài khoản"
+                    value="admin"
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Mật khẩu</label>
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Nhập mật khẩu"
+                    value="123456"
+                >
+            </div>
+
+            <button
+                class="btn-login"
+                onclick="login()">
+                Đăng nhập
+            </button>
+
+            <div id="loginStatus" class="status hidden"></div>
+
+            <div class="note">
+            </div>
+
+        </div>
+
+
+
+        <div id="dashboardSection" class="dashboard">
+
+            <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:10px;
+                flex-wrap:wrap;
+            ">
+
+                <div>
+                    <h2>Dashboard</h2>
+                    <p style="margin-top:5px;color:#64748b;">
+                        Xin chào, <strong id="currentUser"></strong>
+                    </p>
+                </div>
+
+                <button
+                    class="btn-logout"
+                    onclick="logout()">
+                    Đăng xuất
+                </button>
+
+            </div>
+
+
+
+            <div class="info-grid">
+
+                <div class="card">
+
+                    <h3> Access Token</h3>
+
+                    <div
+                        id="accessToken"
+                        class="token">
+                    </div>
+
+                    <p style="margin-top:10px;">
+                        Hết hạn:
+                        <strong id="accessExpiry"></strong>
+                    </p>
+
+                </div>
+
+
+                <div class="card">
+
+                    <h3> Refresh Token</h3>
+
+                    <div
+                        id="refreshToken"
+                        class="token">
+                    </div>
+
+                    <p style="margin-top:10px;">
+                        Hết hạn:
+                        <strong id="refreshExpiry"></strong>
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="buttons">
+
+                <button
+                    class="btn-api"
+                    onclick="callProtectedAPI()">
+                     Gọi API
+                </button>
+
+                <button
+                    class="btn-refresh"
+                    onclick="refreshAccessToken()">
+                     Refresh Access Token
+                </button>
+
+                <button
+                    onclick="simulateAccessExpired()">
+                     Mô phỏng Access Token hết hạn
+                </button>
+
+                <button
+                    onclick="simulateRefreshExpired()">
+                     Mô phỏng Refresh Token hết hạn
+                </button>
+
+            </div>
+
+
+
+            <div
+                id="status"
+                class="status">
+                Hệ thống đã đăng nhập.
+            </div>
+
+
+
+            <h3 style="margin-top:25px;">
+                API Response
+            </h3>
+
+            <div
+                id="apiResult"
+                class="api-result">
+                Chưa gọi API.
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+
+const ACCESS_TOKEN_LIFETIME = 60 * 1000;
+// Access Token sống 60 giây
+
+const REFRESH_TOKEN_LIFETIME = 5 * 60 * 1000;
+// Refresh Token sống 5 phút
+
+
+
+function generateToken(prefix) {
+
+    return prefix + "_" +
+        Math.random().toString(36).substring(2) +
+        "_" +
+        Date.now();
+
+}
+
+
+function saveAuth(auth) {
+
+    localStorage.setItem(
+        "auth",
+        JSON.stringify(auth)
+    );
+
+}
+
+
+function getAuth() {
+
+    const data =
+        localStorage.getItem("auth");
+
+    if (!data) {
+        return null;
+    }
+
+    return JSON.parse(data);
+
+}
+
+
+function clearAuth() {
+
+    localStorage.removeItem("auth");
+
+}
+
+
+function showStatus(message, type = "") {
+
+    const status =
+        document.getElementById("status");
+
+    status.textContent = message;
+
+    status.className =
+        "status " + type;
+
+}
+
+
+function showLoginStatus(message, type = "") {
+
+    const status =
+        document.getElementById("loginStatus");
+
+    status.textContent = message;
+
+    status.className =
+        "status " + type;
+
+}
+
+
+
+async function login() {
+
+    const username =
+        document.getElementById("username").value.trim();
+
+    const password =
+        document.getElementById("password").value;
+
+    if (!username || !password) {
+
+        showLoginStatus(
+            "Vui lòng nhập đầy đủ thông tin.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    /*
+    ==============================================
+    TRONG HỆ THỐNG THẬT:
+
+    fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            username,
+            password
+        })
+    })
+
+    Sau đó backend trả về:
+
+    {
+        accessToken: "...",
+        refreshToken: "..."
+    }
+    ==============================================
+    */
+
+
+    // Demo tạo token
+    const now = Date.now();
+
+    const auth = {
+
+        username: username,
+
+        accessToken:
+            generateToken("ACCESS"),
+
+        refreshToken:
+            generateToken("REFRESH"),
+
+        accessExpiresAt:
+            now + ACCESS_TOKEN_LIFETIME,
+
+        refreshExpiresAt:
+            now + REFRESH_TOKEN_LIFETIME
+
+    };
+
+
+    saveAuth(auth);
+
+    showLoginStatus(
+        "Đăng nhập thành công!",
+        "success"
+    );
+
+    setTimeout(() => {
+
+        showDashboard();
+
+    }, 500);
+
+}
+
+
+
+function showDashboard() {
+
+    const auth = getAuth();
+
+    if (!auth) {
+        return;
+    }
+
+    document
+        .getElementById("loginSection")
+        .style.display = "none";
+
+    document
+        .getElementById("dashboardSection")
+        .style.display = "block";
+
+
+    document
+        .getElementById("currentUser")
+        .textContent = auth.username;
+
+
+    updateTokenDisplay();
+
+}
+
+
+
+
+function updateTokenDisplay() {
+
+    const auth = getAuth();
+
+    if (!auth) {
+        return;
+    }
+
+
+    document
+        .getElementById("accessToken")
+        .textContent =
+        auth.accessToken;
+
+
+    document
+        .getElementById("refreshToken")
+        .textContent =
+        auth.refreshToken;
+
+
+    document
+        .getElementById("accessExpiry")
+        .textContent =
+        formatTime(auth.accessExpiresAt);
+
+
+    document
+        .getElementById("refreshExpiry")
+        .textContent =
+        formatTime(auth.refreshExpiresAt);
+
+}
+
+
+function formatTime(timestamp) {
+
+    return new Date(timestamp)
+        .toLocaleTimeString("vi-VN");
+
+}
+
+
+
+
+function isAccessTokenExpired(auth) {
+
+    return Date.now() >=
+        auth.accessExpiresAt;
+
+}
+
+
+
+function isRefreshTokenExpired(auth) {
+
+    return Date.now() >=
+        auth.refreshExpiresAt;
+
+}
+
+
+
+async function callProtectedAPI() {
+
+    let auth = getAuth();
+
+
+    if (!auth) {
+
+        requireLogin();
+
+        return;
+
+    }
+
+
+
+    if (isAccessTokenExpired(auth)) {
+
+        showStatus(
+            "Access Token đã hết hạn. Đang yêu cầu Refresh Token...",
+            "warning"
+        );
+
+
+   
+
+        const success =
+            await refreshAccessToken();
+
+
+        if (!success) {
+
+            return;
+
+        }
+
+
+        auth = getAuth();
+
+    }
+
+
+ 
+
+    /*
+    API thật:
+
+    fetch("/api/books", {
+        method: "GET",
+
+        headers: {
+            "Authorization":
+                "Bearer " + auth.accessToken
+        }
+    });
+
+    */
+
+    const authorizationHeader =
+        "Bearer " + auth.accessToken;
+
+
+    document
+        .getElementById("apiResult")
+        .textContent =
+`GET /api/books
+
+Authorization:
+${authorizationHeader}
+
+Response:
+
+{
+    "success": true,
+    "message": "API được gọi thành công",
+    "data": [
+        {
+            "id": 1,
+            "title": "Lập trình JavaScript"
+        },
+        {
+            "id": 2,
+            "title": "Lập trình Web"
+        }
+    ]
+}`;
+
+
+    showStatus(
+        "Gọi API thành công bằng Access Token.",
+        "success"
+    );
+
+}
+
+
+
+async function refreshAccessToken() {
+
+    const auth = getAuth();
+
+    if (!auth) {
+
+        requireLogin();
+
+        return false;
+
+    }
+
+
+
+
+    if (isRefreshTokenExpired(auth)) {
+
+        showStatus(
+            "Refresh Token đã hết hạn. Vui lòng đăng nhập lại.",
+            "error"
+        );
+
+        alert(
+            "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!"
+        );
+
+        logout();
+
+        return false;
+
+    }
+
+
+    /*
+    ==============================================
+    API THẬT:
+
+    fetch("/api/auth/refresh", {
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            refreshToken:
+                auth.refreshToken
+        })
+    })
+
+    Backend trả:
+
+    {
+        accessToken: "new-access-token"
+    }
+    ==============================================
+    */
+
+
+    // Demo tạo Access Token mới
+
+    auth.accessToken =
+        generateToken("ACCESS");
+
+    auth.accessExpiresAt =
+        Date.now() +
+        ACCESS_TOKEN_LIFETIME;
+
+
+    saveAuth(auth);
+
+    updateTokenDisplay();
+
+
+    showStatus(
+        "Refresh Access Token thành công.",
+        "success"
+    );
+
+
+    return true;
+
+}
+
+
+
+
+function simulateAccessExpired() {
+
+    const auth = getAuth();
+
+    if (!auth) {
+        return;
+    }
+
+    auth.accessExpiresAt =
+        Date.now() - 1000;
+
+    saveAuth(auth);
+
+    updateTokenDisplay();
+
+    showStatus(
+        "Access Token đã được đặt về trạng thái hết hạn.",
+        "warning"
+    );
+
+}
+
+
+
+
+function simulateRefreshExpired() {
+
+    const auth = getAuth();
+
+    if (!auth) {
+        return;
+    }
+
+    auth.refreshExpiresAt =
+        Date.now() - 1000;
+
+    saveAuth(auth);
+
+    updateTokenDisplay();
+
+    showStatus(
+        "Refresh Token đã được đặt về trạng thái hết hạn.",
+        "warning"
+    );
+
+}
+
+
+
+function requireLogin() {
+
+    clearAuth();
+
+    document
+        .getElementById("dashboardSection")
+        .style.display = "none";
+
+    document
+        .getElementById("loginSection")
+        .style.display = "block";
+
+    showLoginStatus(
+        "Vui lòng đăng nhập lại.",
+        "error"
+    );
+
+}
+
+
+
+function logout() {
+
+    clearAuth();
+
+    document
+        .getElementById("dashboardSection")
+        .style.display = "none";
+
+    document
+        .getElementById("loginSection")
+        .style.display = "block";
+
+    document
+        .getElementById("apiResult")
+        .textContent =
+        "Chưa gọi API.";
+
+    showLoginStatus(
+        "Bạn đã đăng xuất.",
+        "success"
+    );
+
+}
+
+
+
+window.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        const auth = getAuth();
+
+        if (!auth) {
+            return;
+        }
+
+
+        /*
+        Nếu Access Token hết hạn
+        nhưng Refresh Token vẫn còn hạn,
+        vẫn cho phép vào Dashboard.
+        */
+
+        if (
+            isRefreshTokenExpired(auth)
+        ) {
+
+            clearAuth();
+
+            return;
+
+        }
+
+
+        showDashboard();
+
+    }
+);
+
+
+
+setInterval(() => {
+
+    const auth = getAuth();
+
+    if (!auth) {
+        return;
+    }
+
+
+    if (
+        isRefreshTokenExpired(auth)
+    ) {
+
+        showStatus(
+            "Refresh Token đã hết hạn. Vui lòng đăng nhập lại.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        isAccessTokenExpired(auth)
+    ) {
+
+        showStatus(
+            "Access Token đã hết hạn. Khi gọi API hệ thống sẽ tự Refresh.",
+            "warning"
+        );
+
+    }
+
+}, 5000);
+
+</script>
+
+</body>
+</html>
